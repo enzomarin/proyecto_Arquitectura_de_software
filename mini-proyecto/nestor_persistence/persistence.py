@@ -53,7 +53,7 @@ def connect_database(user_name, user_password):
     except Error as err:
         print(f"Error: '{err}'")
     return db_connection
-"""
+
 ################## INSERTAR DATOS EN LA BASE DE DATOS ###############
 
 def test_insert_message_in_database(cursor, user, messaje, table):
@@ -110,5 +110,3 @@ print("asdfasdfasasdfasdfasdfasdfasdfasdfasdfasdf")
 
 ## empezamos a consumir mensajes
 #consume_message("nestor","persistence","persistence") 
-
-"""

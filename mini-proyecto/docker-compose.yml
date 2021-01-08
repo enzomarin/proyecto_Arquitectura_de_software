@@ -27,7 +27,7 @@ services:
       - rabbitmq
 
   database:
-   image: mysql:5.7
+   image: mysql
    ports:
       - 3306:3306
    container_name: database_mysql
