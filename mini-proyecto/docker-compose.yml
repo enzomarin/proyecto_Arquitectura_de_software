@@ -1,0 +1,57 @@
+version: '3.6'  
+services:
+  nestor_slack_reader:
+   build:
+      context: ./nestor_slack_reader
+   container_name: nestor_slack_reader
+   environment:
+      - RABBITMQ_HOST=rabbitmq
+   depends_on:
+      - rabbitmq
+   ports:
+      - 3000:3000   
+   networks:
+      - network
+
+  nestor_persistence:
+   build:
+      context: ./nestor_persistence
+   container_name: nestor_persistence
+   networks:
+      - network
+   environment:
+      - MYSQL_HOST=database
+      - RABBITMQ_HOST=rabbitmq
+   depends_on:
+      - database
+      - rabbitmq
+
+  database:
+   image: mysql:5.7
+   ports:
+      - 3306:3306
+   container_name: database_mysql
+   networks: 
+      - network
+   environment:
+      - MYSQL_DATABASE=slack
+      - MYSQL_ROOT_PASSWORD= "root"
+   volumes:
+      - ./mysql:/var/lib/mysql
+   depends_on: 
+      - rabbitmq
+
+  rabbitmq:
+   image: rabbitmq:3-management
+   ports:
+      # The standard AMQP protocol port
+      - '5673:5673'
+      # HTTP management UI
+      - '15672:15672'
+   networks:
+      - network
+   container_name: rabbitmq
+   restart: 'always'
+
+networks:
+  network: {}
