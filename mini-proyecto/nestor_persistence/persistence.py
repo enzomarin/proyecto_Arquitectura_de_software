@@ -23,6 +23,15 @@ def get_database_port():
         port= 3306
     return int(port)
 
+def get_database_host():
+    
+    try:
+        host = os.environ['MYSQL_HOST']
+    except:
+        logging.warning("La variable MYSQL_HOST no esta correctamente creada. Se reemplazara por un valor predeterminado")
+        host= 'localhost'
+    return host
+
 def get_rabbitmq_host():
     try:
         host = os.environ['RABBITMQ_HOST']
@@ -42,7 +51,9 @@ def connect_database(user_name, user_password):
     try:
         db_connection = mysql.connector.connect(
             user=user_name,
-            host="MYSQL_HOST",
+            #host="MYSQL_HOST",
+            #host=get_rabbitmq_host(),
+            host=get_database_host(),
             port=get_database_port(),
             password=user_password,
             database=get_Database_name()
@@ -102,8 +113,8 @@ def consume_message(exchange, queue, routing_key):
 
 
 ## nos conectamos a la base de datos
-connection = connect_database("root", "root")
-print("asdfasdfasasdfasdfasdfasdfasdfasdfasdfasdf")
+connection = connect_database('root', 'root')
+#print("asdfasdfasasdfasdfasdfasdfasdfasdfasdfasdf")
 #cursor = connection.cursor()
 ## especificamos la base de datos a usar
 #cursor.execute("use slack")

@@ -1,6 +1,8 @@
 FROM python:3.6.3
 
-ENV MYSQL_HOST localhost
+#ENV MYSQL_HOST 127.0.0.1
+
+#ENV MYSQL_HOST localhost
 
 ENV MYSQL_PORT 3306
 
