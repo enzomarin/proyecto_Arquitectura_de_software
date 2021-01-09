@@ -21,6 +21,7 @@ channel = connection.channel()
 #Creamos el exchange 'nestor' de tipo 'fanout'
 channel.exchange_declare(exchange='nestor', exchange_type='topic',durable=True)
 
+
 ################# APLICACION WEB FLASK #########################
 
 # initialize a Flask app to host the events adapter
@@ -40,6 +41,20 @@ print(os.environ.get("SLACK_TOKEN"))
 @app.route("/")
 def hello():
     return "hello there!"
+"""
+# Example responder to greetings
+@slack_events_adapter.on("message")
+def handle_message(event_data):
+    message = event_data["event"]
+    print("esto es una prueba")
+    # If the incoming message contains "hi", then respond with a "Hello" message
+    if message.get("subtype") is None and "hi" in message.get('text'):
+        channel = message["channel"]
+        print(channel)
+        message = "Hello <@%s>! :tada:" % message["user"]
+        print(message)
+        slack_web_client.chat_postMessage(channel=channel, text=message)
+"""
 
 @slack_events_adapter.on("message")
 def message(payload):
@@ -47,18 +62,26 @@ def message(payload):
     """Parse the message event
     """
     print("nuevo mensaje")
-
-    # Get the event data from the payload
-    event = payload.get ("event",{})
-
-    print(event)
-
-    # Get the text from the event that came through
-    text = event.get("text").replace(";",",")
-
-    # Get the text from the event that came through
     
-    user = event.get("user")
+    # Get the event data from the payload
+    message = payload["event"]
+    #event = payload.get ("event",{})
+
+    print(message)
+
+    # Get the text from the event that came through
+    text = message.get("text").replace(";",",")
+
+    # Get the text from the event that came through
+    user_id = message["user"]
+
+
+    # Get the id of Channel from the event that came through
+    #channel_slack= event.get("channel")
+    channel_slack =message["channel"]
+
+
+
 
     
 
@@ -66,9 +89,18 @@ def message(payload):
     print(text)
 
     print("-------------------- Usuario ---------------")
-    print(user)
+    print(user_id)
 
-    channel.basic_publish(exchange='nestor',  routing_key='persistence', body=user+","+text)
+    print("-------------------- Id canal ---------------")
+    print(channel_slack)
+
+
+
+    print("\n\n")
+
+    print("send..........")
+    channel.basic_publish(exchange='nestor',  routing_key='publicar_slack', body=user_id+","+text) ## envio los mensajes a la cola
+    print("mensaje enviado..............")
 
 if __name__ == "__main__":
 

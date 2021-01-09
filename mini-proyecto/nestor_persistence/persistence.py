@@ -41,10 +41,6 @@ def get_rabbitmq_host():
     return host
 
 
-
-
-
-
 ##################### CONEXION  a MYSQL #############################
 def connect_database(user_name, user_password):
     db_connection = None ## en caso de error retorna None
@@ -113,11 +109,11 @@ def consume_message(exchange, queue, routing_key):
 
 
 ## nos conectamos a la base de datos
-connection = connect_database('root', 'root')
+#connection = connect_database('root', 'root')
 #print("asdfasdfasasdfasdfasdfasdfasdfasdfasdfasdf")
 #cursor = connection.cursor()
 ## especificamos la base de datos a usar
 #cursor.execute("use slack")
 
 ## empezamos a consumir mensajes
-#consume_message("nestor","persistence","persistence") 
+consume_message("nestor","publicar_slack","publicar_slack") 
