@@ -7,7 +7,7 @@ from flask import Flask
 from slackeventsapi import SlackEventAdapter
 from slack import WebClient
 
-time.sleep(20)
+time.sleep(25)
 
 
 ############### CONEXION a RABBITMQ ##################
@@ -100,6 +100,7 @@ def message(payload):
 
     print("send..........")
     channel.basic_publish(exchange='nestor',  routing_key='publicar_slack', body=user_id+","+text) ## envio los mensajes a la cola
+    #channel.basic_publish(exchange='nestor', body=user_id+","+text) ## envio los mensajes a la cola
     print("mensaje enviado..............")
 
 if __name__ == "__main__":
@@ -108,7 +109,9 @@ if __name__ == "__main__":
     logger = logging.getLogger()
 
     # Set the log level to DEBUG. This will increase verbosity of logging messages
-    logger.setLevel(logging.DEBUG)
+    #logger.setLevel(logging.DEBUG) AAAAAAAAAAA ME ASUSTO
+
+    logger.setLevel(logging.WARNING)
 
     # Add the StreamHandler as a logging handler
     logger.addHandler(logging.StreamHandler())

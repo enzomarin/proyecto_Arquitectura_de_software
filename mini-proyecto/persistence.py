@@ -9,14 +9,20 @@ import logging
 import time
 time.sleep(30)
 
+#print("AAAAAA1")
 
 def get_database_name():
+    print("xd")
     return "slack"
 
+#print("AAAAAA2")
 def get_table_name():
+    print("xd")
     return "mensajes"
 
+#print("AAAAAA3")
 def get_database_port():
+    print("xd")
     try:
         port = os.environ['MYSQL_PORT']
     except:
@@ -27,7 +33,7 @@ def get_database_port():
 #print("AAAAAA4")
 
 def get_database_host():
-    #print("xd")
+    print("xd")
     try:
         host = os.environ['MYSQL_HOST']
     except:
@@ -35,9 +41,23 @@ def get_database_host():
         host= 'localhost'
     return host
 
+#print("AAAAAA5")
+
+def get_rabbitmq_host():
+    print("xd")
+    try:
+        host = os.environ['RABBITMQ_HOST']
+    except:
+        logging.warning("La variable RABBITMQ_HOST no esta correctamente creada. Se reemplazara po un valor predeterminado")
+        host = 'localhost'
+    return host
+
+#print("AAAAAA6")
+
+
 ##################### CONEXION  a MYSQL #############################
 def connect_database(user_name, user_password):
-    #print("xd")
+    print("xd")
     db_connection = None ## en caso de error retorna None
     try:
         db_connection = mysql.connector.connect(
@@ -59,8 +79,8 @@ def connect_database(user_name, user_password):
 #print("AAAAAA7")
 ################## INSERTAR DATOS EN LA BASE DE DATOS ###############
 
-def insert_message_in_database(cursor, user, mensaje, table):
-    #print("xd")
+def test_insert_message_in_database(cursor, user, messaje, table):
+    print("xd")
     if table is None:
         table = get_table_name()
     try:
@@ -72,43 +92,55 @@ def insert_message_in_database(cursor, user, mensaje, table):
 
 #print("AAAAAA8")
 
-
-connection = connect_database('root', 'root')
-
-
 ##################### CONNEXIÓN A RABBIT MQ #######################
+def connect_rabbitmq(exchange, queue, routing_key):
+    print("xd")
+#def connect_rabbitmq(exchange, queue):
+    ##HOST = os.environ['RABBITMQ_HOST']
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host=get_rabbitmq_host()))
+    channel = connection.channel()
+    channel.exchange_declare(exchange=exchange, exchange_type='fanout', durable=True) #anteriormente topic
 
+    # se crea una cola temporaria para este consumidor
+    result = channel.queue_declare(queue=queue, exclusive=False, durable=True)
+    queue_name = result.method.queue
 
-def callback(ch, method, properties, body):
+    # la cola se asigna a un 'exchange'
+    channel.queue_bind(exchange=exchange, queue = queue_name, routing_key=routing_key)
+    #channel.queue_bind(exchange=exchange, queue = queue_name)
+
+    return channel
+
+#print("AAAAAA9")
+
+## metodo que es llamado por RabbitMQ cuando se recibe un mensaje
+def on_message(ch, method, properties, body):
+    print("xd")
     print("Message received: " + body.decode()) ##decode recupera el contenido
     message = body.decode()
-    insert_message_in_database(" ", message, get_Database_name(), get_table_name())
+    #insert_message_in_database(" ", message, get_Database_name(), get_table_name())
+
+print("AAAAAA10")
+
+def consume_message(exchange, queue, routing_key):
+    print("xd")
+#def consume_message():
+    print('[*] Waiting for messages. To exit press CTRL+C')
+    
+    #channel= connect_rabbitmq('nestor', 'publicar_slack') ## conexion a RabbitMQ
+
+    channel= connect_rabbitmq(exchange, queue, routing_key)
+    # Consumir mensajes
+    channel.basic_consume(queue=queue, on_message_callback=on_message, auto_ack=True) #queue=queue
+    channel.start_consuming()
 
 
-HOST = os.environ['RABBITMQ_HOST']
+print("AAAAAA11")
 
-connection = pika.BlockingConnection(
-    pika.ConnectionParameters(host=HOST))
-channel = connection.channel()
-
-#El consumidor utiliza el exchange 'nestor'
-channel.exchange_declare(exchange='nestor', exchange_type='topic', durable=True) #topic
-
-#Se crea un cola temporaria exclusiva para este consumidor (búzon de correos)
-result = channel.queue_declare(queue="publicar_slack", exclusive=True, durable=True)
-queue_name = result.method.queue
-
-#La cola se asigna a un 'exchange'
-channel.queue_bind(exchange='nestor', queue=queue_name, routing_key="publicar_slack")
-
-channel.basic_consume(
-    queue=queue_name, on_message_callback=callback, auto_ack=True)
-
-channel.start_consuming()
 
 ## nos conectamos a la base de datos
-
-#print("asdfasdfasasdfasdfasdfasdfasdfasdfasdfasdf")
+connection = connect_database('root', 'root')
+print("asdfasdfasasdfasdfasdfasdfasdfasdfasdfasdf")
 #cursor = connection.cursor()
 ## especificamos la base de datos a usar
 #cursor.execute("use slack")

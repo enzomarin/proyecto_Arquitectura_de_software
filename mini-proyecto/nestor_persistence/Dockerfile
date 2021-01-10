@@ -14,4 +14,4 @@ WORKDIR /nestor_persistence
 
 COPY ./persistence.py /persistence.py
 
-CMD [ "python", "/persistence.py"]
+CMD [ "python", "-u", "/persistence.py"]

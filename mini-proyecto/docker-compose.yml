@@ -57,5 +57,10 @@ services:
    container_name: rabbitmq
    restart: 'always'
 
+   volumes:
+    - "/etc/timezone:/etc/timezone:ro"
+    - "/etc/localtime:/etc/localtime:ro"
+
+   
 networks:
   network: {}
