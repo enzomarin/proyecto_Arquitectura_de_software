@@ -58,31 +58,48 @@ def connect_database(user_name, user_password):
 
 #print("AAAAAA7")
 ################## INSERTAR DATOS EN LA BASE DE DATOS ###############
-
-def insert_message_in_database(cursor, user, mensaje, table):
-    #print("xd")
-    if table is None:
-        table = get_table_name()
+def create_table(name_table):
     try:
-        query= "insert into " ++ table ++ " values" ++ " ("++ user ++","++messaje++");"
+        query = "create table if not exists " + get_table_name() +" (id INT NOT NULL AUTO_INCREMENT,user VARCHAR(30) NOT NULL, mensaje TEXT,id_channel VARCHAR(30), PRIMARY KEY (id));"
+        
         cursor.execute(query)
+        print("Tabla creada!")
+    except Error as err:
+        print(f"Error: '{err}'")
+
+
+def insert_message_in_database(datos ):
+
+
+    try:
+        #query= "insert into " + get_table_name() + " values ("+ user +","+mensaje+ "," + id_channel + ");"
+        cursor.execute("insert into " + get_table_name() + "(user,mensaje,id_channel) values(%s,%s,%s)", datos)
+        #cursor.execute(query)
         print("Insert message in database successfull")
     except Error as err:
         print(f"Error: '{err}'")
 
-#print("AAAAAA8")
 
 
-connection = connect_database('root', 'root')
 
+
+
+
+
+db_connection = connect_database('root', 'root')
+cursor = db_connection.cursor()
+create_table(get_table_name())
 
 ##################### CONNEXIÓN A RABBIT MQ #######################
 
 
 def callback(ch, method, properties, body):
+    
     print("Message received: " + body.decode()) ##decode recupera el contenido
     message = body.decode()
-    insert_message_in_database(" ", message, get_Database_name(), get_table_name())
+    datos = message.split(',')
+    #print(datos)
+    insert_message_in_database(datos)
 
 
 HOST = os.environ['RABBITMQ_HOST']

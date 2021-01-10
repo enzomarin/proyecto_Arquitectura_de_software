@@ -99,7 +99,7 @@ def message(payload):
     print("\n\n")
 
     print("send..........")
-    channel.basic_publish(exchange='nestor',  routing_key='publicar_slack', body=user_id+","+text) ## envio los mensajes a la cola
+    channel.basic_publish(exchange='nestor',  routing_key='publicar_slack', body=user_id+","+text + "," + channel_slack) ## envio los mensajes a la cola
     #channel.basic_publish(exchange='nestor', body=user_id+","+text) ## envio los mensajes a la cola
     print("mensaje enviado..............")
 
