@@ -24,10 +24,8 @@ def get_database_port():
         port= 3306
     return int(port)
 
-#print("AAAAAA4")
 
 def get_database_host():
-    #print("xd")
     try:
         host = os.environ['MYSQL_HOST']
     except:
@@ -37,7 +35,6 @@ def get_database_host():
 
 ##################### CONEXION  a MYSQL #############################
 def connect_database(user_name, user_password):
-    #print("xd")
     db_connection = None ## en caso de error retorna None
     try:
         db_connection = mysql.connector.connect(
@@ -56,7 +53,6 @@ def connect_database(user_name, user_password):
         print(f"Error: '{err}'")
     return db_connection
 
-#print("AAAAAA7")
 ################## INSERTAR DATOS EN LA BASE DE DATOS ###############
 def create_table(name_table):
     try:
@@ -70,11 +66,10 @@ def create_table(name_table):
 
 def insert_message_in_database(datos ):
 
-
+    #insert into mensajes (user, mensaje, id_channel) values("gma2", "aaaaaaa", 323);
     try:
-        #query= "insert into " + get_table_name() + " values ("+ user +","+mensaje+ "," + id_channel + ");"
         cursor.execute("insert into " + get_table_name() + "(user,mensaje,id_channel) values(%s,%s,%s)", datos)
-        #cursor.execute(query)
+        db_connection.commit()
         print("Insert message in database successfull")
     except Error as err:
         print(f"Error: '{err}'")

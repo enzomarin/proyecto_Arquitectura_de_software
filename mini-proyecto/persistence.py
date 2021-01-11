@@ -1,4 +1,6 @@
-
+volumes:
+    - "/etc/timezone:/etc/timezone:ro"
+    - "/etc/localtime:/etc/localtime:ro"
 ## pip3 install mysql-connector-python
 import mysql.connector
 from mysql.connector import Error
