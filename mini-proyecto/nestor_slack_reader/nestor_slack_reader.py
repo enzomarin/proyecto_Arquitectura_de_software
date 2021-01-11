@@ -41,7 +41,7 @@ print(os.environ.get("SLACK_TOKEN"))
 @app.route("/")
 def hello():
     return "hello there!"
-"""
+
 # Example responder to greetings
 @slack_events_adapter.on("message")
 def handle_message(event_data):
@@ -54,7 +54,7 @@ def handle_message(event_data):
         message = "Hello <@%s>! :tada:" % message["user"]
         print(message)
         slack_web_client.chat_postMessage(channel=channel, text=message)
-"""
+
 
 @slack_events_adapter.on("message")
 def message(payload):
@@ -67,7 +67,7 @@ def message(payload):
     message = payload["event"]
     #event = payload.get ("event",{})
 
-    print(message)
+    #print(message)
 
     # Get the text from the event that came through
     text = message.get("text").replace(";",",")
@@ -99,7 +99,10 @@ def message(payload):
     print("\n\n")
 
     print("send..........")
-    channel.basic_publish(exchange='nestor',  routing_key='publicar_slack', body=user_id+","+text + "," + channel_slack) ## envio los mensajes a la cola
+    if text.startswith("[sql]"):
+        channel.basic_publish(exchange='nestor',  routing_key='consulta_sql', body=user_id+","+text + "," + channel_slack) ## envio los mensajes a la cola
+    else:
+        channel.basic_publish(exchange='nestor',  routing_key='publicar_slack', body=user_id+","+text + "," + channel_slack) ## envio los mensajes a la cola
     #channel.basic_publish(exchange='nestor', body=user_id+","+text) ## envio los mensajes a la cola
     print("mensaje enviado..............")
 

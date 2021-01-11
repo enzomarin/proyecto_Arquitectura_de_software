@@ -7,8 +7,10 @@ import os
 import sys
 import logging
 import time
+from slack import WebClient
 time.sleep(30)
 
+slack_web_client = WebClient(token=os.environ.get("SLACK_TOKEN"))
 
 def get_database_name():
     return "slack"
@@ -64,7 +66,7 @@ def create_table(name_table):
         print(f"Error: '{err}'")
 
 
-def insert_message_in_database(datos ):
+def insert_message_in_database(datos):
 
     #insert into mensajes (user, mensaje, id_channel) values("gma2", "aaaaaaa", 323);
     try:
@@ -74,12 +76,13 @@ def insert_message_in_database(datos ):
     except Error as err:
         print(f"Error: '{err}'")
 
-
-
-
-
-
-
+def recover_message_in_database(query):
+    try:
+        cursor.execute(query)
+        resultado = cursor.fetchall()
+    except Error as err:
+        print(f"Error: '{err}'")
+    return resultado
 
 db_connection = connect_database('root', 'root')
 cursor = db_connection.cursor()
@@ -93,8 +96,17 @@ def callback(ch, method, properties, body):
     print("Message received: " + body.decode()) ##decode recupera el contenido
     message = body.decode()
     datos = message.split(',')
-    #print(datos)
-    insert_message_in_database(datos)
+
+    if str(datos[1]).startswith("[sql]"): #b'
+        #HOLAAA
+        resultado = recover_message_in_database(datos[1][6:])
+        #print("SACREBLEU" + datos[1])
+        print(resultado)
+        ########## PUBLICA EL RESULTADO COMO EVENTO EN RABBITMQ ##########
+        #channel.basic_publish(exchange='nestor', routing_key="respuesta", body=resultado)
+        slack_web_client.chat_postMessage(channel=datos[3], text=resultado)
+    else:
+        insert_message_in_database(datos) 
 
 
 HOST = os.environ['RABBITMQ_HOST']
@@ -110,8 +122,15 @@ channel.exchange_declare(exchange='nestor', exchange_type='topic', durable=True)
 result = channel.queue_declare(queue="publicar_slack", exclusive=True, durable=True)
 queue_name = result.method.queue
 
+#consultas sql
+#result2 = channel.queue_declare(queue="consulta_sql", exclusive=True, durable=True)
+#queue_name2 = result.method.queue
+
+
 #La cola se asigna a un 'exchange'
 channel.queue_bind(exchange='nestor', queue=queue_name, routing_key="publicar_slack")
+
+channel.queue_bind(exchange='nestor', queue=queue_name, routing_key="consulta_sql")
 
 channel.basic_consume(
     queue=queue_name, on_message_callback=callback, auto_ack=True)
