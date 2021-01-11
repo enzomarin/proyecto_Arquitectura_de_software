@@ -41,8 +41,8 @@ services:
       # Password for root access
       #MYSQL_ROOT_PASSWORD: 'password'
    volumes:
-      #- ./mysql:/var/lib/mysql
-      - my-datavolume:/var/lib/mysql
+      - ./mysql:/var/lib/mysql
+      #- my-datavolume:/var/lib/mysql
    depends_on: 
       - rabbitmq
 

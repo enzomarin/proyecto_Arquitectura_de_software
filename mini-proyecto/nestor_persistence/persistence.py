@@ -88,9 +88,12 @@ db_connection = connect_database('root', 'root')
 cursor = db_connection.cursor()
 create_table(get_table_name())
 
-##################### CONNEXIÓN A RABBIT MQ #######################
 
 
+def write_slack_channel(channel_id, message):
+    for x in message:
+        slack_web_client.chat_postMessage(channel= channel_id,text= x)
+        
 def callback(ch, method, properties, body):
     
     print("Message received: " + body.decode()) ##decode recupera el contenido
@@ -104,11 +107,15 @@ def callback(ch, method, properties, body):
         print(resultado)
         ########## PUBLICA EL RESULTADO COMO EVENTO EN RABBITMQ ##########
         #channel.basic_publish(exchange='nestor', routing_key="respuesta", body=resultado)
-        slack_web_client.chat_postMessage(channel=datos[3], text=resultado)
+        try:
+            write_slack_channel(datos[3], resultado)
+            #slack_web_client.chat_postMessage(channel=datos[3], text=resultado)
+        except:
+            slack_web_client.chat_postMessage(channel=datos[2], text="consulta SQL no valida! err: falta ';'")
     else:
         insert_message_in_database(datos) 
 
-
+##################### CONNEXIÓN A RABBIT MQ #######################
 HOST = os.environ['RABBITMQ_HOST']
 
 connection = pika.BlockingConnection(
